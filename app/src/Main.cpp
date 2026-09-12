@@ -1,8 +1,17 @@
 #include <engine/core/Engine.hpp>
+#include <memory>
+#include <spdlog/spdlog.h>
 
-/**
- * Start here...
- */
+class MyApp : public engine::core::App {
+
+public:
+    void app_setup() override;
+};
+
+void MyApp::app_setup() {
+    spdlog::info("Hello, setup!");
+}
+
 int main(int argc, char **argv) {
-    return 0;
+    return std::make_unique<MyApp>()->run(argc, argv);
 }
