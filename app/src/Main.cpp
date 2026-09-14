@@ -1,4 +1,5 @@
 #include <engine/core/Engine.hpp>
+#include <engine/graphics/GraphicsController.hpp>
 #include <memory>
 #include <spdlog/spdlog.h>
 
@@ -6,6 +7,8 @@ class MainController : public engine::core::Controller {
 protected:
     void initialize() override {
         engine::graphics::OpenGL::enable_depth_testing();
+        auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+        graphics->camera()->Position = glm::vec3(0.0f, 0.0f, 3.0f);
     }
     void begin_draw() override {
         engine::graphics::OpenGL::clear_buffers();
@@ -14,6 +17,11 @@ protected:
         auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
         auto shader = resources->shader("basketball");
         auto basketball = resources->model("basketball");
+        auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+        shader->use();
+        shader->set_mat4("projection", graphics->projection_matrix());
+        shader->set_mat4("view", graphics->camera()->view_matrix());
+        shader->set_mat4("model", glm::mat4(1.0f));
         basketball->draw(shader);
     }
     void end_draw() override {
