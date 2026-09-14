@@ -7,6 +7,19 @@ protected:
     void initialize() override {
         engine::graphics::OpenGL::enable_depth_testing();
     }
+    void begin_draw() override {
+        engine::graphics::OpenGL::clear_buffers();
+    }
+    void draw() override {
+        auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
+        auto shader = resources->shader("basketball");
+        auto basketball = resources->model("basketball");
+        basketball->draw(shader);
+    }
+    void end_draw() override {
+        engine::core::Controller::get<engine::platform::PlatformController>()
+                ->swap_buffers();
+    }
 };
 
 class MyApp : public engine::core::App {
