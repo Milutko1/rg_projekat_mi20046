@@ -1,7 +1,11 @@
 {
   "resources": {
     "models": {
+    "basketball": {
+        "path": "basketball/CHAHIN_BASKETBALL.obj",
+        "flip_uvs": false
     }
+}
   },
   "window": {
     "height": 600,
