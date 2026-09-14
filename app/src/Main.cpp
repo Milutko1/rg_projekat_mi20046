@@ -19,6 +19,8 @@ protected:
         auto basketball = resources->model("basketball");
         auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
         shader->use();
+        shader->set_vec3("point_position", glm::vec3(-1.0f, -0.8f, 1.0f));
+        shader->set_vec3("point_color", glm::vec3(1.0f, 1.0f, 1.0f));
         shader->set_vec3("viewPos", graphics->camera()->Position);
         shader->set_mat4("projection", graphics->projection_matrix());
         shader->set_mat4("view", graphics->camera()->view_matrix());
