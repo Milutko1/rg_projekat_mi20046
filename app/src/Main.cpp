@@ -1,10 +1,12 @@
 #include <engine/core/Engine.hpp>
 #include <engine/graphics/GraphicsController.hpp>
+#include <imgui.h>
 #include <memory>
 #include <spdlog/spdlog.h>
 
 class MainController : public engine::core::Controller {
 protected:
+    float m_point_intensity = 1.0f;
     void initialize() override {
         engine::graphics::OpenGL::enable_depth_testing();
         auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
@@ -20,12 +22,17 @@ protected:
         auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
         shader->use();
         shader->set_vec3("point_position", glm::vec3(-1.0f, -0.8f, 1.0f));
-        shader->set_vec3("point_color", glm::vec3(1.0f, 1.0f, 1.0f));
+        shader->set_vec3("point_color", glm::vec3(m_point_intensity));
         shader->set_vec3("viewPos", graphics->camera()->Position);
         shader->set_mat4("projection", graphics->projection_matrix());
         shader->set_mat4("view", graphics->camera()->view_matrix());
         shader->set_mat4("model", glm::mat4(1.0f));
         basketball->draw(shader);
+        graphics->begin_gui();
+        ImGui::Begin("Osvetljenje");
+        ImGui::SliderFloat("Point jacina", &m_point_intensity, 0.0f, 2.0f);
+        ImGui::End();
+        graphics->end_gui();
     }
     void end_draw() override {
         engine::core::Controller::get<engine::platform::PlatformController>()
