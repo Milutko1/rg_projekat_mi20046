@@ -4,6 +4,9 @@
     "basketball": {
         "path": "basketball/CHAHIN_BASKETBALL.obj",
         "flip_uvs": true
+    },
+    "floor": {
+        "path": "floor/model.obj"
     }
 }
   },

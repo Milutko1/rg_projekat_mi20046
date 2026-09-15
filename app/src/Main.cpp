@@ -52,6 +52,7 @@ protected:
         auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
         auto shader = resources->shader("basketball");
         auto basketball = resources->model("basketball");
+        auto floor = resources->model("floor");
         auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
         shader->use();
         shader->set_vec3("point_position", glm::vec3(-1.0f, -0.8f, 1.0f));
@@ -66,7 +67,17 @@ protected:
 
         shader->set_mat4("model", model);
 
+        shader->set_int("use_texture", 1);
         basketball->draw(shader);
+
+        glm::mat4 floor_model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.55561f, 0.0f));
+
+        shader->set_mat4("model", floor_model);
+        shader->set_int("use_texture", 0);
+        shader->set_vec3("object_color", glm::vec3(0.74f, 0.33f, 0.06f));
+
+        floor->draw(shader);
+
         graphics->begin_gui();
         ImGui::Begin("Osvetljenje");
         ImGui::SliderFloat("Point jacina", &m_point_intensity, 0.0f, 2.0f);
