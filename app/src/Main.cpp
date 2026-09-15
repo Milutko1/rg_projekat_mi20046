@@ -1,5 +1,8 @@
+#include <cmath>
 #include <engine/core/Engine.hpp>
 #include <engine/graphics/GraphicsController.hpp>
+#include <glm/gtc/constants.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <imgui.h>
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -7,10 +10,40 @@
 class MainController : public engine::core::Controller {
 protected:
     float m_point_intensity = 1.0f;
+    bool m_animation_active = false;
+    float m_animation_time = 0.0f;
+    float m_ball_height = 0.0f;
+    float m_ball_angle = 0.0f;
     void initialize() override {
         engine::graphics::OpenGL::enable_depth_testing();
         auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
         graphics->camera()->Position = glm::vec3(0.0f, 0.0f, 3.0f);
+    }
+    void poll_events() override {
+        auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
+        if (platform->key(engine::platform::KEY_SPACE).state() == engine::platform::Key::State::JustPressed) {
+            m_animation_active = true;
+            m_animation_time = 0.0f;
+            m_ball_height = 0.0f;
+            m_ball_angle = 0.0f;
+        }
+    }
+
+    void update() override {
+        if (!m_animation_active) {
+            return;
+        }
+        auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
+        m_animation_time += platform->dt();
+        if (m_animation_time < 1.0f) {
+            m_ball_height = 0.0f;
+        } else if (m_animation_time < 5.0f) {
+            float bounce_time = m_animation_time - 1.0f;
+            m_ball_height = 0.4f * std::abs(std::sin(glm::pi<float>() * bounce_time));
+        } else {
+            m_ball_height = 0.0f;
+            m_ball_angle = glm::radians(45.0f) * (m_animation_time - 5.0f);
+        }
     }
     void begin_draw() override {
         engine::graphics::OpenGL::clear_buffers();
@@ -26,7 +59,13 @@ protected:
         shader->set_vec3("viewPos", graphics->camera()->Position);
         shader->set_mat4("projection", graphics->projection_matrix());
         shader->set_mat4("view", graphics->camera()->view_matrix());
-        shader->set_mat4("model", glm::mat4(1.0f));
+
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, m_ball_height, 0.0f));
+
+        model = glm::rotate(model, m_ball_angle, glm::vec3(0.0f, 1.0f, 0.0f));
+
+        shader->set_mat4("model", model);
+
         basketball->draw(shader);
         graphics->begin_gui();
         ImGui::Begin("Osvetljenje");
@@ -35,8 +74,7 @@ protected:
         graphics->end_gui();
     }
     void end_draw() override {
-        engine::core::Controller::get<engine::platform::PlatformController>()
-                ->swap_buffers();
+        engine::core::Controller::get<engine::platform::PlatformController>()->swap_buffers();
     }
 };
 
@@ -48,8 +86,7 @@ public:
 
 void MyApp::app_setup() {
     auto main_controller = register_controller<MainController>();
-    main_controller->after(
-            engine::core::Controller::get<engine::core::EngineControllersEnd>());
+    main_controller->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
     spdlog::info("Hello, setup!");
 }
 
