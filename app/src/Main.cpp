@@ -8,6 +8,14 @@
 #include <spdlog/spdlog.h>
 
 class MainController : public engine::core::Controller {
+public:
+    float point_intensity() const {
+        return m_point_intensity;
+    }
+    void set_point_intensity(float intensity) {
+        m_point_intensity = intensity;
+    }
+
 protected:
     float m_point_intensity = 1.0f;
     bool m_animation_active = false;
@@ -77,15 +85,25 @@ protected:
         shader->set_vec3("object_color", glm::vec3(0.74f, 0.33f, 0.06f));
 
         floor->draw(shader);
-
-        graphics->begin_gui();
-        ImGui::Begin("Osvetljenje");
-        ImGui::SliderFloat("Point jacina", &m_point_intensity, 0.0f, 2.0f);
-        ImGui::End();
-        graphics->end_gui();
     }
     void end_draw() override {
         engine::core::Controller::get<engine::platform::PlatformController>()->swap_buffers();
+    }
+};
+
+class GuiController : public engine::core::Controller {
+protected:
+    void draw() override {
+        auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+        auto main_controller = engine::core::Controller::get<MainController>();
+        float intensity = main_controller->point_intensity();
+        graphics->begin_gui();
+        ImGui::Begin("Osvetljenje");
+        if (ImGui::SliderFloat("Point jacina", &intensity, 0.0f, 2.0f)) {
+            main_controller->set_point_intensity(intensity);
+        }
+        ImGui::End();
+        graphics->end_gui();
     }
 };
 
@@ -98,6 +116,8 @@ public:
 void MyApp::app_setup() {
     auto main_controller = register_controller<MainController>();
     main_controller->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
+    auto gui_controller = register_controller<GuiController>();
+    gui_controller->after(main_controller);
     spdlog::info("Hello, setup!");
 }
 
