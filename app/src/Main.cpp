@@ -1,8 +1,8 @@
-#include <engine/core/Engine.hpp>
+#include "MyApp.hpp"
 
-/**
- * Start here...
- */
+#include <memory>
+#include <spdlog/spdlog.h>
+
 int main(int argc, char **argv) {
-    return 0;
+    return std::make_unique<MyApp>()->run(argc, argv);
 }
